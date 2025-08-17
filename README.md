@@ -40,7 +40,7 @@ Login and pick the right subscription:
 ```bash
 az login
 az account list -o table
-az account set --subscription "<SUBSCRIPTION NAME OR ID>"
+az account set --subscription "cc57cd42-dede-4674-b810-a0fbde41504a"
 ```
 
 ---
@@ -49,10 +49,10 @@ az account set --subscription "<SUBSCRIPTION NAME OR ID>"
 
 ```bash
 # ==== REQUIRED: change to your real values ====
-export SUB_ID="<your-subscription-id>"
-export RG="<your-resource-group>"
-export LOC="centralindia"              # e.g., centralindia, eastus, westeurope
-export VM_NAME="<your-vm-name>"
+export SUB_ID="cc57cd42-dede-4674-b810-a0fbde41504a"
+export RG="myRG"
+export LOC="eastus"              # e.g., centralindia, eastus, westeurope
+export VM_NAME="myvm"
 
 # workspace name can be anything unique in the RG
 export LA_WS="logws-${RG}"
