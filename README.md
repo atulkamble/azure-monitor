@@ -61,7 +61,7 @@ export DCRA_NAME="dcr-assoc-${VM_NAME}"
 
 # Optional: Action Group for alerts (email)
 export ACTION_GRP="ag-${RG}"
-export ACTION_EMAIL="<you@example.com>"
+export ACTION_EMAIL="atul_kamble@hotmail.com"
 ```
 
 Sanity:
