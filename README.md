@@ -1,7 +1,3 @@
-Awesome—here’s a production-ready **README.md** you can drop straight into your repo. It uses **Azure Monitor Agent (AMA)** (modern, supported) and covers VM onboarding, a reusable **Data Collection Rule (DCR)**, alerting (metrics + logs), verification KQL, and optional PaaS diagnostics. I’ve included copy-paste blocks and variables so you can run end-to-end quickly.
-
----
-
 # Azure Monitor with AMA — VM + DCR + Alerts
 
 End-to-end setup to collect **metrics & logs** from Azure VMs into **Log Analytics**, visualize with KQL, and trigger **alerts**. Uses the **Azure Monitor Agent (AMA)** and **Data Collection Rules (DCR)**.
@@ -13,7 +9,7 @@ End-to-end setup to collect **metrics & logs** from Azure VMs into **Log Analyti
 ## 📁 Repo Structure (suggested)
 
 ```
-azure-monitor-ama-starter/
+azure-monitor/
 ├─ README.md
 ├─ scripts/
 │  ├─ 01_env.sh
