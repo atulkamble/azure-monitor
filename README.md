@@ -1,245 +1,105 @@
-structured **Azure App Service Overview + Azure Monitor integration guide** with **bullets, commands, codes, and steps**:
+Here’s a **step-by-step tutorial on Azure Monitor** with commands and examples so you can get hands-on quickly 🚀.
 
 ---
 
-## 📖 **Azure App Service Overview**
+# 📊 Azure Monitor Tutorial
 
-* Azure App Service is a **fully managed platform** for building, deploying, and scaling web apps.
-* Supports **.NET, Java, Node.js, Python, PHP, Ruby**.
-* Integrated with **CI/CD pipelines** and **Azure DevOps, GitHub Actions**.
-* Supports **custom domains, SSL, autoscaling, staging slots, and backup/restore**.
+Azure Monitor is Microsoft’s **full-stack monitoring service** for collecting, analyzing, and acting on telemetry from Azure and on-premises environments.
 
 ---
 
-## 🏷️ **App Service Plans**
+## 1️⃣ What Azure Monitor Does
 
-* Defines **pricing tier, region, compute resources (CPU, Memory, Scaling)**.
-* Types of plans:
-
-  * **Free/F1** – Testing, limited features.
-  * **Shared/D1** – Basic shared compute.
-  * **Basic (B1-B3)** – Dedicated compute, manual scaling.
-  * **Standard (S1-S3)** – Autoscaling, staging slots.
-  * **Premium (P1v2-P3v2)** – Enhanced performance, VNET integration.
-  * **Isolated** – Dedicated environment in VNET.
+* **Collect**: Metrics, logs, traces from VMs, containers, databases, apps.
+* **Analyze**: Use Kusto Query Language (KQL) in **Log Analytics**.
+* **Visualize**: Dashboards, Workbooks, Grafana, Power BI.
+* **Act**: Alerts, Automation Runbooks, Logic Apps, Functions.
 
 ---
 
-## 🛠️ **Steps to Create App Service & App Service Plan**
+## 2️⃣ Enable Azure Monitor
 
-### 1️⃣ **Create Resource Group**
+### a) For Virtual Machines
 
 ```bash
-az group create --name MyResourceGroup --location eastus
+az vm extension set \
+  --resource-group MyResourceGroup \
+  --vm-name MyVM \
+  --name OmsAgentForLinux \
+  --publisher Microsoft.EnterpriseCloud.Monitoring
 ```
 
-### 2️⃣ **Create App Service Plan**
+### b) For Containers (AKS)
 
 ```bash
-az appservice plan create \
-  --name MyAppServicePlan \
+az aks enable-addons \
   --resource-group MyResourceGroup \
-  --sku S1 \
-  --is-linux
-```
-
-### 3️⃣ **Create Web App**
-
-```bash
-az webapp create \
-  --resource-group MyResourceGroup \
-  --plan MyAppServicePlan \
-  --name MyUniqueAppName123 \
-  --runtime "PYTHON|3.9"
+  --name MyAKSCluster \
+  --addons monitoring \
+  --workspace-resource-id /subscriptions/<subId>/resourceGroups/<rgName>/providers/Microsoft.OperationalInsights/workspaces/<workspaceName>
 ```
 
 ---
 
-## 🚀 **Deployment Center (CI/CD Integration)**
+## 3️⃣ Collect Logs & Metrics
 
-* Automate deployment from **GitHub, Azure Repos, Bitbucket**.
+* **Metrics**: Lightweight numbers (CPU %, Memory, Disk I/O, etc.).
+* **Logs**: Rich event/traces stored in **Log Analytics Workspace**.
 
-### Azure CLI Example – Link GitHub Repo:
+Example: Query VM CPU usage with KQL
 
-```bash
-az webapp deployment source config \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --repo-url https://github.com/YourUser/YourRepo.git \
-  --branch main \
-  --manual-integration
+```kusto
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize avg(CounterValue) by bin(TimeGenerated, 5m), Computer
 ```
 
 ---
 
-## 🔄 **Scaling App Services**
+## 4️⃣ Create Alerts
 
-* Manual or Autoscale based on **CPU, Memory, Schedule**.
-* Scale settings are based on **App Service Plan** tier.
-
-### Manual Scaling (CLI):
+### CLI Example – Alert on CPU > 80%
 
 ```bash
-az appservice plan update \
-  --name MyAppServicePlan \
+az monitor metrics alert create \
+  --name HighCPUAlert \
   --resource-group MyResourceGroup \
-  --number-of-workers 3
-```
-
-### Enable Autoscale Rule:
-
-```bash
-az monitor autoscale create \
-  --resource-group MyResourceGroup \
-  --resource MyAppServicePlan \
-  --resource-type Microsoft.Web/serverfarms \
-  --name autoscale-webapp \
-  --min-count 1 \
-  --max-count 5 \
-  --count 1
+  --scopes /subscriptions/<subId>/resourceGroups/<rgName>/providers/Microsoft.Compute/virtualMachines/MyVM \
+  --condition "avg Percentage CPU > 80" \
+  --description "Alert when CPU usage > 80%"
 ```
 
 ---
 
-## 🧪 **Deployment Slots (Staging Environment)**
+## 5️⃣ Visualization
 
-* Allows **blue-green deployments**.
-* Swap slots with zero downtime.
-
-### Create a Staging Slot:
-
-```bash
-az webapp deployment slot create \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --slot staging
-```
-
-### Swap Slots:
-
-```bash
-az webapp deployment slot swap \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --slot staging
-```
+* **Azure Portal** → Monitor → Metrics/Workbooks → Create charts.
+* **Grafana**: Use **Azure Monitor plugin**.
+* **Power BI**: Connect to Log Analytics with KQL queries.
 
 ---
 
-## 🗂️ **Backups & Restore**
+## 6️⃣ Automation
 
-### Enable Backup for App Service:
+* Link alerts to:
 
-```bash
-az webapp config backup create \
-  --resource-group MyResourceGroup \
-  --webapp-name MyUniqueAppName123 \
-  --container-url https://<your-storage-account>.blob.core.windows.net/<container-name>?<SAS-token>
-```
+  * **Azure Logic Apps** (notify via Teams/Slack)
+  * **Azure Functions** (auto-scale, shutdown VMs)
+  * **Runbooks** (auto-remediation)
 
 ---
 
-## 🌐 **Custom Domains & SSL Binding**
+## 7️⃣ Best Practices
 
-### Map Custom Domain:
-
-```bash
-az webapp config hostname add \
-  --resource-group MyResourceGroup \
-  --webapp-name MyUniqueAppName123 \
-  --hostname www.customdomain.com
-```
-
-### Upload SSL Certificate:
-
-```bash
-az webapp config ssl upload \
-  --resource-group MyResourceGroup \
-  --name MyUniqueAppName123 \
-  --certificate-file path/to/certificate.pfx \
-  --certificate-password <password>
-```
-
-### Bind SSL:
-
-```bash
-az webapp config ssl bind \
-  --resource-group MyResourceGroup \
-  --name MyUniqueAppName123 \
-  --certificate-thumbprint <thumbprint> \
-  --ssl-type SNI
-```
+* Use **Action Groups** for alert routing.
+* Separate **Prod & Non-Prod Workspaces**.
+* Enable **Diagnostic Settings** for PaaS services (App Service, SQL, Cosmos DB).
+* Export logs to **Storage Account** for long-term retention.
 
 ---
 
-## 📊 **Azure Monitor Integration for App Services**
-
-### Features:
-
-* **Application Insights** – Full APM (Performance, Failures, Traces, Custom Metrics).
-* **Log Analytics Workspace** – Centralized logs.
-* **Alerts** – Metric-based & Log-based alerts.
-* **Metrics Explorer & Workbooks**.
-
-### 1️⃣ **Enable Application Insights**
-
-```bash
-az monitor app-insights component create \
-  --app MyAppInsights \
-  --location eastus \
-  --resource-group MyResourceGroup \
-  --application-type web
-```
-
-### 2️⃣ **Link App Insights to Web App**
-
-```bash
-az webapp config appsettings set \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --settings APPINSIGHTS_INSTRUMENTATIONKEY=<InstrumentationKey>
-```
-
-Or directly link:
-
-```bash
-az webapp config set \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --app-insights MyAppInsights
-```
+✅ With this setup, you can monitor **VMs, AKS, Databases, Apps, and Networks** end-to-end.
 
 ---
 
-### 3️⃣ **Enable Diagnostic Logs (Azure Monitor Logs)**
-
-```bash
-az webapp log config \
-  --name MyUniqueAppName123 \
-  --resource-group MyResourceGroup \
-  --application-logging true \
-  --detailed-error-messages true \
-  --failed-request-tracing true
-```
-
----
-
-### 4️⃣ **View Metrics & Logs**
-
-* Navigate to **Azure Portal → Monitor → Metrics**.
-* Query logs in **Log Analytics Workspace** using **KQL (Kusto Query Language)**.
-* Setup **Alerts** in Monitor → Alerts.
-
----
-
-## ✅ **Summary Points**
-
-* App Service is Azure’s **PaaS for web apps** with integrated CI/CD, scaling, backups, and monitoring.
-* **App Service Plan** defines compute resources.
-* Use **Deployment Slots** for zero downtime releases.
-* Enable **Application Insights** for real-time app monitoring.
-* Integrate **Azure Monitor Logs & Alerts** for proactive monitoring.
-
----
-
-Do you want me to create a **full README.md structure for Azure App Service + Azure Monitor project with all codes & diagrams?**
+Would you like me to **create a complete project repo** (Terraform + sample KQL queries + alert rules + dashboard JSON) so you can deploy and test Azure Monitor in your own subscription?
